@@ -1,0 +1,328 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:b="http://bootsfaces.net/ui"
+                template="/WEB-INF/adminLTE/template.xhtml">
+
+    <ui:define name="head">
+        <style type="text/css">
+            .form-signin-bs {
+                margin: 0 auto;
+                min-width: 330px;
+                max-width: 530px;
+                padding: 15px;
+            }
+        </style>    
+    </ui:define>
+
+    <ui:define name="headerContent">
+        <h1>
+            <span class="text-blue text-bold">C</span>atálogos - <span class="text-blue text-bold">U</span>suarios
+        </h1>
+    </ui:define>
+
+    <ui:define name="centerContent">
+
+        <h:form id="formData">
+            <p:focus context="panelBusqueda" />
+
+            <p:growl id="msgs" autoUpdate="false" showDetail="true" />
+            <p:panel header="Filtros de búsqueda" visible="#{usuarioBean.showPanelDatos}" id="panelBusqueda">
+
+                <pe:fluidGrid styleClass="fluidGrid" hGutter="0" vGutter="0" id="fluidGrid">
+
+                    <pe:fluidGridItem styleClass="input-id">
+                        <div class="dynaFormLabel">
+                            <p:outputLabel value="Id: " for="id" />
+                        </div>
+                        <p:inputText id="id" value="#{usuarioBean.usuarioFilter.id}" maxlength="4" />
+                    </pe:fluidGridItem>
+
+                    <pe:fluidGridItem styleClass="input-responsive">
+                        <div class="dynaFormLabel">
+                            <h:outputLabel value="Username: " for="username" />
+                        </div>
+                        <p:inputText id="username" value="#{usuarioBean.usuarioFilter.userName}" maxlength="20" />
+                    </pe:fluidGridItem>
+
+                    <pe:fluidGridItem styleClass="input-responsive">
+                        <div class="dynaFormLabel">
+                            <p:outputLabel value="Nombre: " for="nombre" />
+                        </div>
+                        <p:inputText id="nombre" value="#{usuarioBean.usuarioFilter.nombre}" maxlength="30" />
+                    </pe:fluidGridItem>
+
+                    <pe:fluidGridItem styleClass="select-responsive">
+                        <div class="dynaFormLabel">
+                            <p:outputLabel value="Perfil:" for="perfil" />
+                        </div>
+                        <p:selectOneMenu id="perfil" value="#{usuarioBean.usuarioFilter.rolId.id}" >
+                            <f:selectItem itemLabel="[ -TODOS- ]" itemValue="0" />
+                            <f:selectItems value="#{usuarioBean.roles}" var="rol" itemLabel="#{rol.nombre}" itemValue="#{rol.id}" />
+                        </p:selectOneMenu>
+
+                    </pe:fluidGridItem>
+
+                </pe:fluidGrid>
+
+                <f:facet name="footer" >
+                    <p:commandButton value="Buscar" actionListener="#{usuarioBean.search}" process="@form" icon="fa fa-binoculars"
+                                     update="@([id$=panelBusqueda]) @([id$=msgs]) @([id$=dtDatos])" />
+                    <p:commandButton value="Limpiar" update="panelBusqueda" icon="fa fa-eraser" process="@this" style="margin-left:5px;" >
+                        <p:resetInput target="panelBusqueda" />
+                    </p:commandButton>
+                </f:facet>
+
+            </p:panel>
+
+            <p:panel id="pnlData" visible="#{usuarioBean.showPanelDatos}" style="margin-top: 15px;" >
+                <p:dataTable var="usuario" value="#{usuarioBean.lazyModel}" rows="10"
+                             id="dtDatos" lazy="true" paginator="true" editable="true" 
+                             rowKey="#{usuario.id}"
+                             paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                             rowsPerPageTemplate="10,15" paginatorPosition="bottom" paginatorAlwaysVisible="false"
+                             widgetVar="wvDatos" rowIndexVar="rowIndex" scrollable="true">
+
+                    <p:ajax event="rowEdit" listener="#{usuarioBean.onRowEdit}" update="@([id$=dtDatos]) @([id$=panelBusqueda]) @([id$=msgs])" />
+                    <p:ajax event="rowEditCancel" listener="#{usuarioBean.onRowCancel}" update="@([id$=dtDatos]) @([id$=panelBusqueda]) @([id$=msgs])" />
+
+                    <f:facet name="header">
+                        <p:outputPanel style="text-align: right;">
+                            <p:commandButton icon="ui-icon-plus" value="Nuevo" action="#{usuarioBean.cleanObject}" 
+                                             update="@([id$=formNewRegistro]) @([id$=formData])" process="@form" >
+                                <f:setPropertyActionListener value="#{null}" target="#{usuarioBean.usuarioInstance}" />
+                                <f:setPropertyActionListener value="false" target="#{usuarioBean.showPanelDatos}" />
+                                <f:setPropertyActionListener value="create" target="#{usuarioBean.tipoActualizacion}" />
+                            </p:commandButton>
+                        </p:outputPanel>
+                    </f:facet>
+
+                    <!--<p:column selectionMode="multiple" style="width:16px;text-align:center"/>-->
+
+                    <p:column style="width:35px; text-align: center" rendered="false" >
+                        <b:commandButton value="" styleClass="add-tooltip-class" iconAwesome="key" size="xs" look="primary" action="#{usuarioBean.consultaAutorizadores}" 
+                                         oncomplete="PF('autorizaciones').show();" ajax="true" title="Autorizaciones" >  
+                            <f:setPropertyActionListener value="#{usuario}" target="#{usuarioBean.selectedUsuario}" />
+                        </b:commandButton>
+                    </p:column>
+
+                    <p:column headerText="Username" style="width:115px; text-align: center;" sortBy="#{usuario.userName}">
+                        <h:outputText value="#{usuario.userName}" />
+                    </p:column>
+
+                    <p:column headerText="Nombre" style="width:315px" sortBy="#{usuario.nombre}">
+                        <p:cellEditor>
+                            <f:facet name="output"><h:outputText value="#{usuario.nombre} #{usuario.paterno} #{usuario.materno}" /></f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{usuario.nombre}" style="width:30%" label="Nombre" maxlength="30" />
+                                <p:inputText value="#{usuario.paterno}" style="width:30%" label="Nombre" maxlength="30" />
+                                <p:inputText value="#{usuario.materno}" style="width:30%" label="Nombre" maxlength="30" />
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <p:column headerText="CURP" style="width:175px; text-align: center;">
+                        <p:cellEditor>
+                            <f:facet name="output"><h:outputText value="#{usuario.curp}" /></f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{usuario.curp}" style="width:98%" label="Curp" maxlength="30" />
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <p:column headerText="Email" style="width:255px">
+                        <p:cellEditor>
+                            <f:facet name="output"><h:outputText value="#{usuario.email}" /></f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{usuario.email}" style="width:98%" label="Email" maxlength="30" />
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <p:column headerText="Perfil" sortBy="#{usuario.rolId}" style="width:185px; text-align: center;">
+                        <p:cellEditor>
+                            <f:facet name="output"><h:outputText value="#{usuario.rolId.nombre}" /></f:facet>
+                            <f:facet name="input">
+                                <p:selectOneMenu value="#{usuario.rolId.id}" style="width:100%">
+                                    <f:selectItems value="#{usuarioBean.roles}" var="rol" itemLabel="#{rol.nombre}" itemValue="#{rol.id}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <p:column headerText="Estado" style="width:125px; text-align: center;">
+                        <p:cellEditor>
+                            <f:facet name="output">
+                                <h:outputText value="ACTIVO" rendered="#{usuario.estado eq 'A'}" />
+                                <h:outputText value="INACTIVO" rendered="#{usuario.estado eq 'I'}" />
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:selectOneMenu value="#{usuario.estado}" style="width:100%">
+                                    <f:selectItem itemValue="A" itemLabel="ACTIVO" />
+                                    <f:selectItem itemValue="I" itemLabel="INACTIVO" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <p:column style="width:35px; text-align: center" >
+                        <p:rowEditor />
+                    </p:column>
+
+                    <p:column style="width:35px; text-align: center" >
+                        <p:commandLink action="#{usuarioBean.delete}" process="@this" update="@([id$=dtDatos]) @([id$=msgs])" title="Eliminar usuario" >
+                            <span class="ui-icon ui-icon-trash"></span> 
+                            <f:setPropertyActionListener value="#{usuario}" target="#{usuarioBean.selectedUsuario}" />
+                            <p:confirm header="Confirmation" message="Are you sure?" icon="ui-icon-alert" />
+                        </p:commandLink> 
+                    </p:column>
+
+                </p:dataTable>
+
+            </p:panel>
+
+        </h:form>
+
+        <h:form id="formNewRegistro" >
+            <p:panel id="pnlActualizacion" visible="#{not usuarioBean.showPanelDatos}" >
+
+                <f:facet name="header" >
+                    <h:outputText value="Alta de Usuario" rendered="#{usuarioBean.tipoActualizacion eq 'create'}" />
+                    <h:outputText value="Actualización de Usuario" rendered="#{usuarioBean.tipoActualizacion eq 'update'}" />
+                </f:facet>
+
+                <pe:fluidGrid styleClass="fluidGrid" hGutter="10" vGutter="5" style="width: 100%;" id="fluidGrid">
+
+                    <pe:fluidGridItem styleClass="input-medium">
+                        <div class="dynaFormLabel">
+                            <p:outputLabel value="Username:" for="userName" />
+                        </div>
+                        <p:inputText id="userName" value="#{usuarioBean.usuarioInstance.userName}" maxlength="20" required="true" />
+                    </pe:fluidGridItem>
+
+                    <pe:fluidGridItem styleClass="input-medium">
+                        <div class="dynaFormLabel">
+                            <p:outputLabel value="Password:" for="password" />
+                        </div>
+                        <p:password id="password" value="#{usuarioBean.usuarioInstance.password}" maxlength="30" required="true" />
+                    </pe:fluidGridItem>
+
+                    <pe:fluidGridItem styleClass="input-medium">
+                        <div class="dynaFormLabel">
+                            <p:outputLabel value="Nombre:" for="nombre" />
+                        </div>
+                        <p:inputText id="nombre" value="#{usuarioBean.usuarioInstance.nombre}" maxlength="30" required="true" />
+                    </pe:fluidGridItem>
+
+                    <pe:fluidGridItem styleClass="input-medium">
+                        <div class="dynaFormLabel">
+                            <p:outputLabel value="Ap. paterno:" for="paterno" />
+                        </div>
+                        <p:inputText id="paterno" value="#{usuarioBean.usuarioInstance.paterno}" maxlength="30" required="true" />
+                    </pe:fluidGridItem>
+
+                    <pe:fluidGridItem styleClass="input-medium">
+                        <div class="dynaFormLabel">
+                            <p:outputLabel value="Ap. materno:" for="materno" />
+                        </div>
+                        <p:inputText id="materno" value="#{usuarioBean.usuarioInstance.materno}" maxlength="30" />
+                    </pe:fluidGridItem>
+
+                    <pe:fluidGridItem styleClass="input-medium">
+                        <div class="dynaFormLabel">
+                            <p:outputLabel value="Curp:" for="curp" />
+                        </div>
+                        <p:inputText id="curp" value="#{usuarioBean.usuarioInstance.curp}" maxlength="18"  />
+                    </pe:fluidGridItem>
+
+                    <pe:fluidGridItem styleClass="input-medium">
+                        <div class="dynaFormLabel">
+                            <p:outputLabel value="Email:" for="email" />
+                        </div>
+                        <p:inputText id="email" value="#{usuarioBean.usuarioInstance.email}" maxlength="40" required="true" />
+                    </pe:fluidGridItem>
+
+                    <pe:fluidGridItem styleClass="select-small">
+                        <div class="dynaFormLabel">
+                            <p:outputLabel value="Rol:" for="rol" />
+                        </div>
+                        <p:selectOneMenu id="rol" value="#{usuarioBean.usuarioInstance.rolId.id}" required="true">
+                            <f:selectItem itemValue="#{null}" itemLabel="[-- SELECCIONE --]" />
+                            <f:selectItems value="#{usuarioBean.roles}" var="rol" itemLabel="#{rol.nombre}" itemValue="#{rol.id}" />
+                        </p:selectOneMenu>
+                    </pe:fluidGridItem>
+
+                    <pe:fluidGridItem styleClass="select-small">
+                        <div class="dynaFormLabel">
+                            <p:outputLabel value="Estado:" for="estado" />
+                        </div>
+                        <p:selectOneMenu id="estado" value="#{usuarioBean.usuarioInstance.estado}" style="width:100%" required="true">
+                            <f:selectItem itemValue="A" itemLabel="ACTIVO" />
+                            <f:selectItem itemValue="I" itemLabel="INACTIVO" />
+                        </p:selectOneMenu>
+                    </pe:fluidGridItem>
+                </pe:fluidGrid>
+
+                <f:facet name="footer" >
+                    <p:commandButton type="submit" value="Agregar" actionListener="#{usuarioBean.create}" process="@form"
+                                     update="@([id$=formNewRegistro]) @([id$=formData]) @([id$=msgs])" icon="fa fa-save"
+                                     rendered="#{usuarioBean.tipoActualizacion eq 'create'}" />
+                    <p:spacer width="10" />
+                    <p:commandButton value="Cancelar" update="@([id$=formNewRegistro]) @([id$=formData])" process="@this" icon="fa fa-hand-o-left" >
+                        <f:setPropertyActionListener value="true" target="#{usuarioBean.showPanelDatos}" />
+                        <p:resetInput target="pnlActualizacion" />
+                    </p:commandButton>
+
+                </f:facet>
+
+            </p:panel>
+        </h:form>
+
+        <p:dialog widgetVar="autorizaciones" id="autorizaciones" dynamic="true" appendTo="@(body)" modal="true" header="Autorizaciones">
+            <h:form id="formAutorizacion" class="form-signin-bs">
+                <p:panel>
+                    <p:panelGrid columns="2" style="width: 100%;">
+
+                        <p:outputLabel for="login" value="Login: " />
+                        <p:inputText id="login" value="#{usuarioBean.autorizador.login}" required="true" requiredMessage="* La clave de usuario es requerido" 
+                                     styleClass="form-control" placeholder="Clave de usuario" autocomplete="off" disabled="true" />
+
+                        <p:outputLabel for="clave" value="Clave: " />
+                        <p:inputText id="clave"  value="#{usuarioBean.autorizador.claveAutorizacion}" autocomplete="off" maxlength="12" required="true" 
+                                     requiredMessage="* La clave de autorización es requerida" styleClass="form-control" placeholder="Clave de autorización" />
+
+                        <f:facet name="footer" >
+                            <div style="text-align: left; margin: 2px; padding: 2px;" >
+                                <p:commandButton value="Aceptar" icon="fa fa-sign-in" actionListener="#{usuarioBean.saveAutorizador}" 
+                                                 oncomplete="handleRequest(xhr, status, args);" update="formAutorizacion @([id$=msgs])" />
+                                <b:commandButton look="primary" value="Aceptar" iconAwesome="sign-in" actionListener="#{usuarioBean.saveAutorizador}" ajax="true" 
+                                                 oncomplete="handleRequest(xhr, status, args);" update="formAutorizacion" rendered="false" />
+                                <p:spacer width="6" />
+                                <b:commandButton look="important" value="Cancelar" iconAwesome="ban" actionListener="#{usuarioBean.saveAutorizador}" ajax="true" 
+                                                 oncomplete="handleRequest(xhr, status, args);" rendered="false" />
+                                <p:commandButton value="Cancelar" icon="fa fa-ban" oncomplete="PF('autorizaciones').hide();" process="@this" >
+                                    <p:resetInput target="formAutorizacion" />
+                                </p:commandButton>
+
+                            </div>
+                        </f:facet>
+                    </p:panelGrid>
+                </p:panel>
+            </h:form>
+        </p:dialog>
+
+        <script type="text/javascript">
+            function handleRequest(xhr, status, args) {
+                if (!args.validationFailed &amp;&amp; args.saved) {
+                    PF('autorizaciones').hide();
+                }
+            }
+        </script>
+
+    </ui:define>
+
+</ui:composition>
+

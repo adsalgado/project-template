@@ -1,0 +1,20 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:b="http://bootsfaces.net/ui"
+                template="/WEB-INF/adminLTE/template.xhtml">
+
+    <ui:define name="headerContent">
+        <h1>
+            <span class="text-blue">E</span>rror
+        </h1>
+    </ui:define>
+
+    <ui:define name="centerContent">
+        <p>¡Ha ocurrido un error inesperado! Mensaje: #{pfExceptionHandler.message}</p>
+        <p><h:outputText value="#{pfExceptionHandler.formattedStackTrace}" escape="false" /></p>
+    </ui:define>
+
+</ui:composition>

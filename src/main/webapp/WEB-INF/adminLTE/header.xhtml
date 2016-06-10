@@ -1,0 +1,156 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:fragment xmlns="http://www.w3.org/1999/xhtml"
+             xmlns:h="http://java.sun.com/jsf/html"
+             xmlns:ui="http://java.sun.com/jsf/facelets"
+             xmlns:b="http://bootsfaces.net/ui"
+             xmlns:p="http://primefaces.org/ui"
+             xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+    <!-- Main Header -->
+    <header class="main-header">
+
+        <!-- Logo -->
+        <a href="#" class="logo">
+            <!-- mini logo for sidebar mini 50x50 pixels -->
+            <span class="logo-mini"><b>F</b>lotas</span>
+            <!-- logo for regular state and mobile devices -->
+            <span class="logo-lg"><b>A</b>dmon. <b>F</b>lotas</span>
+        </a>
+
+        <!-- Header Navbar -->
+        <nav class="navbar navbar-static-top" role="navigation">
+            <!-- Sidebar toggle button-->
+            <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                <span class="sr-only">Toggle navigation</span>
+            </a>
+            <!-- Navbar Right Menu -->
+            <div class="navbar-custom-menu">
+                <ul class="nav navbar-nav">
+                    <!-- Messages: style can be found in dropdown.less-->
+                    <c:if test="#{notificacionesBean.listMessages ne null and notificacionesBean.listMessages.size() gt 0 }" >
+                        <li class="dropdown messages-menu" >
+                            <!-- Menu toggle button -->
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-envelope-o"></i>
+                                <span class="label label-success">#{notificacionesBean.listMessages.size()}</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li class="header">Tienes #{notificacionesBean.listMessages.size()} mensaje(s)</li>
+                                <div >
+                                    <p:dataTable value="#{notificacionesBean.listMessages}" var="msg" >
+                                        <p:column style="width: 34px;">
+                                            <span class="fa fa-lg fa-envelope" />
+                                        </p:column>
+                                        <p:column>
+                                            <h:outputText value="#{msg.message}" />
+                                        </p:column>
+                                    </p:dataTable>
+                                </div>                                
+                                <li class="footer"><a href="#">Ver todos</a></li>
+                            </ul>
+                        </li><!-- /.messages-menu -->
+                    </c:if>
+
+                    <!-- Notifications Menu -->
+                    <c:if test="#{notificacionesBean.listNotifications ne null and notificacionesBean.listNotifications.size() gt 0 }" >
+                        <li class="dropdown notifications-menu"  >
+                            <!-- Menu toggle button -->
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-bell-o"></i> 
+                                <span class="label label-warning">
+                                    #{notificacionesBean.listNotifications.size()}
+                                </span>                          
+                            </a>
+                            <ul class="dropdown-menu">
+                                
+                                <li class="header">Tienes #{notificacionesBean.listNotifications.size()} notificacion(es)</li>
+                                <div >
+                                    <p:dataTable value="#{notificacionesBean.listNotifications}" var="msg" >
+                                        <p:column style="width: 34px;">
+                                            <span class="fa fa-lg fa-bell" />
+                                        </p:column>
+                                        <p:column>
+                                            <h:outputText value="#{msg.message}" />
+                                        </p:column>
+                                    </p:dataTable>
+                                </div>                                
+                                <li class="footer"><a href="#">Ver todos</a></li>
+                            </ul>
+                        </li>
+                    </c:if>
+                    <!-- Tasks Menu -->
+                    <c:if test="#{notificacionesBean.listTasks ne null and notificacionesBean.listTasks.size() gt 0 }" >
+                        <li class="dropdown tasks-menu">
+                            <!-- Menu Toggle Button -->
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-flag-o"></i>
+                                <span class="label label-danger">#{notificacionesBean.listTasks.size()}</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                
+                                <li class="header">Tienes #{notificacionesBean.listTasks.size()} pendiente(s)</li>
+                                <div >
+                                    <p:dataTable value="#{notificacionesBean.listTasks}" var="msg" >
+                                        <p:column style="width: 34px;">
+                                            <span class="fa fa-lg fa-flag" />
+                                        </p:column>
+                                        <p:column>
+                                            <h:outputText value="#{msg.message}" />
+                                        </p:column>
+                                    </p:dataTable>
+                                </div>                                
+                                <li class="footer"><a href="#">Ver todos</a></li>
+                            </ul>
+                        </li>
+                    </c:if>
+                    <!-- User Account Menu -->
+                    <li class="dropdown user user-menu">
+                        <!-- Menu Toggle Button -->
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <!-- The user image in the navbar-->
+                            <i class="fa fa-user" />
+                            <!-- hidden-xs hides the username on small devices so only the image appears. -->
+                            <span class="hidden-xs">
+                                <h:outputText value="#{menuView.nombreUsuario}" />
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <!-- The user image in the menu -->
+                            <li class="user-header" style="display: none;" >
+
+                                <p>
+                                    Alexander Pierce - Web Developer
+                                    <small>Member since Nov. 2012</small>
+                                </p>
+                            </li>
+
+                            <!-- Menu Body -->
+                            <li class="user-body">
+                                <div class="col-xs-4 text-center">
+                                    <a href="#{request.contextPath}/inicio.xhtml"><i class="fa fa-home" style="margin-right: 3px;" />Inicio</a>
+                                </div>
+                            </li>
+
+                            <!-- Menu Footer-->
+                            <li class="user-footer">
+                                <div class="pull-right">
+                                    <a href="#{request.contextPath}/j_spring_security_logout" class="btn btn-default btn-flat"><i class="fa fa-sign-out" />Salir</a>
+                                </div>
+                                <div class="pull-left">
+                                    <a href="" class="btn btn-default btn-flat" onclick="showChangePassword(); return false;" ><i class="fa fa-key" />Cambiar Contraseña</a>
+                                </div>
+                            </li>
+
+                        </ul>
+                    </li>
+                    <!-- Control Sidebar Toggle Button -->
+                    <li>
+                        <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+</ui:fragment>

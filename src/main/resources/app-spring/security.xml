@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<b:beans xmlns="http://www.springframework.org/schema/security"
+         xmlns:b="http://www.springframework.org/schema/beans"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+    <!-- secured-annotations="enabled" pre-post-annotations="enabled" jsr250-annotations="enabled" -->
+    <global-method-security jsr250-annotations="enabled"/>       
+    <http use-expressions="true" auto-config="false" entry-point-ref="entryPoint">        
+        <custom-filter position="CONCURRENT_SESSION_FILTER" ref="concurrencyFilter" />
+        <custom-filter position="FORM_LOGIN_FILTER" ref="loginFilter"/>
+        <!-- custom-filter before="LOGOUT_FILTER" ref="logoutFilter"/ -->
+        <http-basic/>
+        <intercept-url pattern="/" access="permitAll"/>
+        <intercept-url pattern="/index.*" access="permitAll"/>        
+        <intercept-url pattern="/login.*" access="permitAll"/>
+        <intercept-url pattern="/ws/*" access="permitAll"/>
+        <intercept-url pattern="/javax.faces.resource/**" access="permitAll"/>
+        <intercept-url pattern="/resources/**" access="permitAll"/>
+        <intercept-url pattern="/security/access/**" access="isAuthenticated()"/>
+        <intercept-url pattern="/**" access="isAuthenticated()"/>
+        <logout invalidate-session="true" logout-url="/j_spring_security_logout" success-handler-ref="logoutSuccessHandler"/>       
+        <access-denied-handler ref="accessDeniedHandler"/>
+        
+        <session-management session-authentication-strategy-ref="sas"/>
+    </http>
+    <!-- HANDLER -->
+    <b:bean id="accessDeniedHandler" class="com.pissa.tia.lib.security.core.access.AccessDeniedHandlerJSON"/>
+    <b:bean id="logoutSuccessHandler" class="com.pissa.tia.lib.security.core.access.LogoutSuccessHandler"/>
+    <!-- FILTERS -->
+    <b:bean id="loginFilter" class="com.pissa.tia.lib.security.core.filters.UsernamePasswordAuthenticationFilterJSON">
+        <b:property name="sessionAuthenticationStrategy" ref="sas" />
+        <b:property name="authenticationManager" ref="authenticationManager"/>
+    </b:bean>   
+    <b:bean id="logoutFilter" class="com.pissa.tia.lib.security.core.filters.LogoutFilter">
+        <b:constructor-arg value="/" />
+        <b:constructor-arg>
+            <b:list>
+                <b:bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
+            </b:list>
+        </b:constructor-arg>
+    </b:bean>
+    <b:bean id="concurrencyFilter" class="org.springframework.security.web.session.ConcurrentSessionFilter">
+        <b:property name="sessionRegistry" ref="sessionRegistry" />
+        <b:property name="expiredUrl" value="/j_spring_security_logout" />
+    </b:bean>    
+    <b:bean id="sas" class="org.springframework.security.web.authentication.session.ConcurrentSessionControlStrategy">
+        <b:constructor-arg name="sessionRegistry" ref="sessionRegistry" />
+        <b:property name="maximumSessions" value="1" />
+        <b:property name="exceptionIfMaximumExceeded" value="true"/>
+    </b:bean>
+
+    <b:bean id="sessionRegistry" class="org.springframework.security.core.session.SessionRegistryImpl" />
+ 
+    <b:bean id="entryPoint" class="com.pissa.tia.lib.security.core.entrypoints.LoginUrlAuthenticationEntryPointJSON">
+        <b:property name="loginFormUrl" value="/index.jsp"/>
+    </b:bean>
+    
+    <!-- b:bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+        <b:property name="allowIfAllAbstainDecisions" value="false"/>
+        <b:property name="decisionVoters">
+            <b:list>
+                <b:bean class="org.springframework.security.access.vote.RoleVoter" />                
+            </b:list> 
+        </b:property>
+    </b:bean -->
+
+    <authentication-manager alias="authenticationManager">
+        <authentication-provider  user-service-ref="userDetailsService" >
+            <password-encoder hash="sha" base64="true"/>
+        </authentication-provider>
+    </authentication-manager>
+    
+</b:beans>

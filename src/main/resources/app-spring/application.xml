@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jee="http://www.springframework.org/schema/jee"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xsi:schemaLocation="
+                http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+                http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd                
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+                http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+                http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:/app-properties/application.properties</value>
+                <value>classpath:/app-properties/certificated.properties</value>
+                <value>classpath:/app-properties/mail.properties</value>                
+            </list>
+        </property>
+    </bean>        
+
+    <!-- CONTEXT SECURITY-PISSA -->    
+    <import resource="classpath:/app-spring/security.xml" />
+
+    <!-- MESSAGES -->    
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basenames">
+            <list>
+                <value>messages</value>
+                <value>org/springframework/security/messages_es_ES</value>
+            </list>
+        </property>
+    </bean>    
+
+    <!-- DATA SOURCE -->    
+    <!-- JNDI -->
+    <jee:jndi-lookup jndi-name="jdbc/MySQLDS" id="dataSourceApplication"/>
+
+    <!-- ALIAS -->    
+    <alias name="dataSourceApplication" alias="dataSourceSecurity"/>    
+    <alias name="dataSourceApplication" alias="dataSourceCaptura"/>
+    <alias name="dataSourceApplication" alias="dataSourceEngine"/>
+     
+    <!-- === -->
+    <!-- DAOs -->
+    <!-- === -->
+    <!-- DAO CORE -->
+    <context:component-scan base-package="com.pissa.tia.*" />
+    
+    <!-- Access web App -->
+    <context:component-scan base-package="com.pissa.tia.core.*"/>
+
+    <!-- security -->
+    <context:component-scan base-package="com.pissa.tia.lib.security.*"/>    
+
+    <!-- prime-faces -->
+    <context:component-scan base-package="com.pissa.tia.faces.lib.*"/>
+    
+    <!--App Services Lib-->   
+    <!--<context:component-scan base-package="com.pissa.tia.lib.flotas.services"/>--> 
+    
+    <!-- App services -->
+    <!--<context:component-scan base-package="com.adeamx.destruccion.lib.scripting.services" />-->
+
+    <!-- Hibernate SessionFactory Definition Annotations -->
+    <bean id="applicationSessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+        <property name="packagesToScan">
+            <list>
+                <value>com.pissa.tia.core.pojos</value>
+            </list>
+        </property>
+        <!--        <prop key="hibernate.query.substitutions">${hibernate.query.substitutions}</prop>
+        <prop key="hibernate.enable_lazy_load_no_trans">true</prop>-->
+        <property name="dataSource" ref="dataSourceApplication" />
+        <property name="hibernateProperties">
+            <value>
+                <![CDATA[
+                        hibernate.show_sql=true
+                        hibernate.format_sql=false
+                        hibernate.dialect=org.hibernate.dialect.MySQLDialect
+                        hibernate.bytecode.use_reflection_optimizer=true
+                        hibernate.cache.provider_class=org.hibernate.cache.HashtableCacheProvider
+                        hibernate.enable_lazy_load_no_trans=true
+                        ]]>
+            </value>
+        </property>
+    </bean>
+
+    <!-- Transaccion Manager -->
+    <bean id="applicationTransactionManager"
+          class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+        <property name="sessionFactory" ref="applicationSessionFactory" />
+    </bean>
+    <tx:annotation-driven transaction-manager="applicationTransactionManager"/>
+    <!-- Definicion del tansaction manager-->
+    <tx:advice id="txAdviceApplication" transaction-manager="applicationTransactionManager">
+        <tx:attributes>
+            <!-- all methods starting with 'get' are read-only -->
+            <tx:method name="get*" read-only="true"/>
+            <!-- other methods use the default transaction settings -->
+            <tx:method name="*" rollback-for="Throwable" />
+        </tx:attributes>
+    </tx:advice>
+    <!-- Configuracion del Transaction Manager -->
+    <aop:config>
+        <aop:pointcut id="configApplicationTransaccionManager" expression="execution(* *servic*.*(..))"/>
+        <aop:advisor pointcut-ref="configApplicationTransaccionManager" advice-ref="txAdviceApplication"/>
+    </aop:config>
+    <!-- Hibernate Template Defintion Anotations -->
+    <bean id="applicationHibernateTemplate" class="org.springframework.orm.hibernate3.HibernateTemplate">
+        <property name="sessionFactory" ref="applicationSessionFactory" />
+        <property name="jdbcExceptionTranslator" ref="jdbcExceptionTranslatorGral" />
+    </bean>
+    <alias name="applicationHibernateTemplate" alias="hibernateTemplate"/>
+    <alias name="applicationHibernateTemplate" alias="templateCapturaGralAnnotations"/>    
+    
+    <!-- Spring Data Access Exception Translator Defintion -->
+    <bean id="jdbcExceptionTranslatorGral" class="org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator">
+        <property name="dataSource" ref="dataSourceApplication" />
+    </bean>      
+    <!-- MAIL -->
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="smtp.gmail.com"/>
+        <property name="port" value="465"/>
+        <property name="protocol" value="smtps"/>
+        <property name="username" value="adsalgado@gmail.com"/>
+        <property name="password" value="Adr14n82"/>
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.smtps.auth">true</prop>                
+                <prop key="mail.smtps.starttls.enable">true</prop>
+                <prop key="mail.smtps.debug">true</prop> 
+            </props>
+        </property>
+    </bean>  
+    <!-- Task executor config -->
+    <bean class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor" id="taskExecutor">
+        <property name="corePoolSize" value="5"></property>
+        <property name="maxPoolSize" value="10"></property>
+        <property name="queueCapacity" value="40"></property>
+        <property name="waitForTasksToCompleteOnShutdown" value="true"></property>
+    </bean>
+    
+    <!-- FREEMAKER CONFIGURATION -->
+    <bean id="freemarkerConfiguration" class="org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean">
+        <property name="preferFileSystemAccess" value="false"/>
+        <property name="templateLoaderPath" value="classpath:/web_mail_config/"/>
+    </bean>
+
+    <!-- RESOLVER -->
+    <!--<mvc:annotation-driven />-->
+    <!--    <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+        <property name="mediaTypes">
+            <map>
+                <entry key="html" value="text/html"/>
+                <entry key="json" value="application/json"/>
+            </map>
+        </property>
+        <property name="viewResolvers">
+            <list>
+                <bean class="org.springframework.web.servlet.view.BeanNameViewResolver"/>
+                <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"/>                    
+            </list>
+        </property>
+        <property name="defaultViews">
+            <list>
+                <bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" />
+            </list>
+        </property>
+    </bean> -->
+    
+    <bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
+        <property name="scopes">
+            <map>
+                <entry key="view">
+                    <bean class="com.pissa.tia.faces.lib.view.ViewScope"/>
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+</beans>
+

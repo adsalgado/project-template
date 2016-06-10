@@ -1,0 +1,242 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:b="http://bootsfaces.net/ui"
+                template="/WEB-INF/adminLTE/template.xhtml">
+
+    <ui:define name="headerContent">
+        <h1>
+            <span class="text-blue text-bold">C</span>onfiguración - <span class="text-blue text-bold">P</span>arámetros
+        </h1>
+    </ui:define>
+
+    <ui:define name="centerContent">
+        <p:growl id="msgs" showDetail="true" showSummary="true" />
+        <h:form id="formData" >
+            <p:panel id="pnlBusqueda" visible="#{configuracionParametrosBean.showPanelDatos}" >
+                <b:container style="width: 100%;" >
+                    <b:row >
+
+                        <b:column col-lg="3" col-md="4" col-sm="6" col-xs="10" style="padding: 0px;" >
+                            <pe:fluidGridItem styleClass="select-responsive">
+                                <div class="dynaFormLabel">
+                                    <p:outputLabel value="Tipo parámetro: " for="tipo" />
+                                </div>
+                                <p:selectOneMenu id="tipo" value="#{configuracionParametrosBean.idTipo}" style="width: 95%;">
+                                    <p:ajax process="@([id$=tipo])" update="@([id$=pnlBusqueda]) @([id$=pnlData])" listener="#{configuracionParametrosBean.onTipoParametroChange()}" />
+                                    <f:selectItem itemValue="#{null}" itemLabel="[-- TODOS --]" />
+                                    <f:selectItems value="#{configuracionParametrosBean.tipos}" var="tipo" itemValue="#{tipo.id}" itemLabel="#{tipo.descripcion}" />
+                                </p:selectOneMenu>                            
+                            </pe:fluidGridItem>
+                        </b:column>
+
+                    </b:row>
+
+                </b:container>
+
+            </p:panel>
+            <p:spacer width="5" />
+            <p:panel id="pnlData"  visible="#{configuracionParametrosBean.showPanelDatos}" >
+                <p:treeTable value="#{configuracionParametrosBean.root}" var="registro" 
+                             selectionMode="single" selection="#{configuracionParametrosBean.selectedNode}" 
+                             style="margin-top:0" rendered="#{configuracionParametrosBean.root ne null}" 
+                             emptyMessage="No se ha seleccionado el tipo de parámetro.">
+
+                    <p:ajax event="select" update="@([id$=btnUpd]) @([id$=btnDel])" />
+                    <p:ajax event="unselect" update="@([id$=btnUpd]) @([id$=btnDel])" />
+
+                    <f:facet name="footer">
+                        <p:outputPanel style="width: 100%; text-align: left;">
+                            <p:commandButton id="btnAlt" value="Nuevo" icon="fa fa-lg fa-plus-square" action="#{configuracionParametrosBean.cleanObject}"  
+                                             process="@this" update="@([id$=formNewRegistro]) @([id$=formData])" style="padding: 3px 7px;" >
+                                <f:setPropertyActionListener value="#{null}" target="#{configuracionParametrosBean.instance}" />
+                                <f:setPropertyActionListener value="false" target="#{configuracionParametrosBean.showPanelDatos}" />
+                                <f:setPropertyActionListener value="create" target="#{configuracionParametrosBean.tipoActualizacion}" />
+                            </p:commandButton>
+                            <p:spacer width="5" />
+                            <p:commandButton id="btnUpd" value="Modificar" icon="fa fa-lg fa-edit" disabled="#{configuracionParametrosBean.selectedNode eq null}"
+                                             process="@this" update="@([id$=formNewRegistro]) @([id$=formData])" style="padding: 3px 7px;" 
+                                             action="#{configuracionParametrosBean.onRowEdit()}" >
+                                <f:setPropertyActionListener value="false" target="#{configuracionParametrosBean.showPanelDatos}" />
+                                <f:setPropertyActionListener value="update" target="#{configuracionParametrosBean.tipoActualizacion}" />
+                            </p:commandButton>   
+                            <p:spacer width="5" />
+                            <p:commandButton id="btnDel" value="Eliminar" icon="fa fa-lg fa-trash" disabled="#{configuracionParametrosBean.selectedNode eq null}"
+                                             process="@this" update="@([id$=formNewRegistro]) @([id$=formData])" style="padding: 3px 7px;" 
+                                             action="#{configuracionParametrosBean.delete()}" >
+                                <p:confirm header="Confirmation" message="¿Deseas eliminar el parámetro seleccionado?" icon="ui-icon-alert" />
+                            </p:commandButton>   
+                        </p:outputPanel>
+                    </f:facet>
+                    <p:column headerText="Parámetro">
+                        <h:outputText value="#{registro.claveParametro}" />
+                    </p:column>
+                    <p:column headerText="Descripción">
+                        <h:outputText value="#{registro.descripcion}" />
+                    </p:column>
+                    <p:column headerText="Característica 1">
+                        <h:outputText value="#{registro.caracteristica1}" />
+                    </p:column>
+                    <p:column style="width:35px; text-align: center;" rendered="false" >
+                        <p:commandLink process="@this" action="#{configuracionParametrosBean.onRowEdit}" update="@form @([id$=formNewRegistro]) @([id$=msgs])" title="Modificar parámetro" >
+                            <span class="fa fa-lg fa-edit"></span> 
+                            <f:setPropertyActionListener value="false" target="#{configuracionParametrosBean.showPanelDatos}" />
+                            <f:setPropertyActionListener value="update" target="#{configuracionParametrosBean.tipoActualizacion}" />
+                        </p:commandLink> 
+                    </p:column>
+                    <p:column style="width:35px; text-align: center" rendered="false" >
+                        <p:commandLink action="#{configuracionParametrosBean.delete}" process="@this" update="@form @([id$=formNewRegistro]) @([id$=msgs])" title="Eliminar parámetro" >
+                            <span class="fa fa-lg fa-trash"></span> 
+                            <p:confirm header="Confirmation" message="¿Deseas eliminar el parámetro seleccionado?" icon="ui-icon-alert" />
+                        </p:commandLink> 
+                    </p:column>
+                </p:treeTable>
+            </p:panel>
+        </h:form>
+
+        <h:form id="formNewRegistro" >
+
+            <p:panel style="width: 100%;" id="pnlActualizacion" visible="#{not configuracionParametrosBean.showPanelDatos}">
+                <b:container style="width: 100%;" >
+                    <b:row >
+
+                        <b:column col-lg="3" col-md="3" col-sm="6" col-xs="10" style="padding: 0px;" >
+                            <pe:fluidGridItem >
+                                <div class="dynaFormLabel">
+                                    <p:outputLabel value="Tipo parámetro: " for="tipoAct" />
+                                </div>
+                                <p:selectOneMenu id="tipoAct" value="#{configuracionParametrosBean.instance.tipoParametroId}" style="width: 95%;"
+                                                 required="true" disabled="#{configuracionParametrosBean.selectedNode ne null}">
+                                    <f:selectItem itemValue="#{null}" itemLabel="[-- TODOS --]" />
+                                    <f:selectItems value="#{configuracionParametrosBean.tipos}" var="tipo" itemValue="#{tipo.id}" itemLabel="#{tipo.descripcion}" />
+                                </p:selectOneMenu>                            
+                            </pe:fluidGridItem>
+                        </b:column>
+
+                        <b:column col-lg="3" col-md="3" col-sm="6" col-xs="10" style="padding: 0px;" >
+                            <pe:fluidGridItem >
+                                <div class="dynaFormLabel">
+                                    <p:outputLabel value="Parent: " for="parent" />
+                                </div>
+                                <p:inputText id="parent" value="#{configuracionParametrosBean.instance.parentId}" style="width: 95%;"  
+                                             disabled="true" />                          
+                            </pe:fluidGridItem>
+                        </b:column>
+
+                        <b:column col-lg="3" col-md="3" col-sm="6" col-xs="10" style="padding: 0px;" >
+                            <pe:fluidGridItem >
+                                <div class="dynaFormLabel">
+                                    <p:outputLabel value="Clave parámetro: " for="claveParametro" />
+                                </div>
+                                <p:inputText id="claveParametro" value="#{configuracionParametrosBean.instance.claveParametro}" style="width: 95%;" 
+                                             required="true" disabled="#{configuracionParametrosBean.tipoActualizacion eq 'update'}" maxlength="20" />
+                            </pe:fluidGridItem>
+                        </b:column>
+
+                        <b:column col-lg="3" col-md="3" col-sm="6" col-xs="10" style="padding: 0px;" >
+                            <pe:fluidGridItem >
+                                <div class="dynaFormLabel">
+                                    <p:outputLabel value="Descripción: " for="descripcion" />
+                                </div>
+                                <p:inputText id="descripcion" value="#{configuracionParametrosBean.instance.descripcion}" style="width: 95%;" 
+                                             required="true"  maxlength="128" />
+                            </pe:fluidGridItem>
+                        </b:column>
+
+                    </b:row>
+
+                    <b:row>
+                        <b:column col-lg="3" col-md="3" col-sm="6" col-xs="10" style="padding: 0px;" >
+                            <pe:fluidGridItem >
+                                <div class="dynaFormLabel">
+                                    <p:outputLabel value="Parámetro 1: " for="param1" />
+                                </div>
+                                <p:inputText id="param1" value="#{configuracionParametrosBean.instance.caracteristica1}" style="width: 95%;" 
+                                             required="false" maxlength="25" />
+                            </pe:fluidGridItem>
+                        </b:column>
+
+                        <b:column col-lg="3" col-md="3" col-sm="6" col-xs="10" style="padding: 0px;" >
+                            <pe:fluidGridItem >
+                                <div class="dynaFormLabel">
+                                    <p:outputLabel value="Parámetro 2: " for="param2" />
+                                </div>
+                                <p:inputText id="param2" value="#{configuracionParametrosBean.instance.caracteristica2}" style="width: 95%;" 
+                                             required="false" maxlength="25" />
+                            </pe:fluidGridItem>
+                        </b:column>
+
+                        <b:column col-lg="3" col-md="3" col-sm="6" col-xs="10" style="padding: 0px;" >
+                            <pe:fluidGridItem >
+                                <div class="dynaFormLabel">
+                                    <p:outputLabel value="Parámetro 3: " for="param3" />
+                                </div>
+                                <p:inputText id="param3" value="#{configuracionParametrosBean.instance.caracteristica3}" style="width: 95%;" 
+                                             required="false" maxlength="25" />
+                            </pe:fluidGridItem>
+                        </b:column>
+
+                        <b:column col-lg="3" col-md="3" col-sm="6" col-xs="10" style="padding: 0px;" >
+                            <pe:fluidGridItem >
+                                <div class="dynaFormLabel">
+                                    <p:outputLabel value="Parámetro 4: " for="param4" />
+                                </div>
+                                <p:inputText id="param4" value="#{configuracionParametrosBean.instance.caracteristica4}" style="width: 95%;" 
+                                             required="false" maxlength="25" />
+                            </pe:fluidGridItem>
+                        </b:column>
+                    </b:row>
+
+                    <b:row>
+                        <b:column col-lg="3" col-md="3" col-sm="6" col-xs="10" style="padding: 0px;" >
+                            <pe:fluidGridItem >
+                                <div class="dynaFormLabel">
+                                    <p:outputLabel value="Parámetro 5: " for="param5" />
+                                </div>
+                                <p:inputText id="param5" value="#{configuracionParametrosBean.instance.caracteristica5}" style="width: 95%;" 
+                                             required="false" maxlength="25" />
+                            </pe:fluidGridItem>
+                        </b:column>
+
+                    </b:row>
+
+                    <b:row>
+                        <b:column col-lg="10" col-md="10" col-sm="12" col-xs="12" style="padding: 0px;" >
+                            <pe:fluidGridItem >
+                                <div class="dynaFormLabel">
+                                    <p:outputLabel value="Código: " for="codigo" />
+                                </div>
+                                <p:inputTextarea id="codigo" value="#{configuracionParametrosBean.instance.configuracion}" style="width: 95%; height: 250px;" 
+                                                 required="false" />
+                            </pe:fluidGridItem>
+                        </b:column>
+                    </b:row>
+
+                </b:container>
+
+                <f:facet name="footer" >
+                    <p:commandButton type="submit" value="Agregar" actionListener="#{configuracionParametrosBean.create}" process="@form"
+                                     update="@([id$=formNewRegistro]) @([id$=formData]) @([id$=msgs])" icon="fa fa-lg fa-save" style="padding: 3px 10px;"
+                                     rendered="#{configuracionParametrosBean.tipoActualizacion eq 'create'}" />
+                    <p:commandButton type="submit" value="Actualizar" actionListener="#{configuracionParametrosBean.update}" process="@form"
+                                     update="@([id$=formNewRegistro]) @([id$=formData]) @([id$=msgs])" icon="fa fa-lg fa-edit" style="padding: 3px 10px;"
+                                     rendered="#{configuracionParametrosBean.tipoActualizacion eq 'update'}" />
+                    <p:spacer width="10" />
+                    <p:commandButton value="Cancelar" update="@([id$=formNewRegistro]) @([id$=formData])" process="@this" icon="fa fa-lg fa-hand-o-left"
+                                     style="padding: 3px 10px;">
+                        <f:setPropertyActionListener value="true" target="#{configuracionParametrosBean.showPanelDatos}" />
+                        <p:resetInput target="pnlActualizacion" />
+                    </p:commandButton>
+
+                </f:facet>
+            </p:panel>
+
+        </h:form>
+
+
+    </ui:define>
+
+</ui:composition>

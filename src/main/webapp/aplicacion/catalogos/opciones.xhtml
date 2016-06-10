@@ -1,0 +1,214 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:b="http://bootsfaces.net/ui"
+                template="/WEB-INF/adminLTE/template.xhtml">
+
+    <ui:define name="head">
+        <style type="text/css">
+            .form-signin-bs {
+                margin: 0 auto;
+                min-width: 330px;
+                max-width: 530px;
+                padding: 15px;
+            }
+        </style>    
+    </ui:define>
+
+    <ui:define name="headerContent">
+        <h1>
+            <span class="text-blue text-bold">C</span>atálogos - 
+            <span class="text-blue text-bold">O</span>pciones del <span class="text-blue text-bold">S</span>istema
+        </h1>
+    </ui:define>
+
+    <ui:define name="centerContent">
+        <h:form id="formData">
+
+            <p:focus context="panelBusqueda" />
+
+            <p:growl id="msgs" autoUpdate="false" showDetail="true" />
+            <p:panel visible="#{permisosBean.showPanelDatos}" id="panelBusqueda">
+
+                <p:dataTable var="registro" value="#{permisosBean.listaConsulta}" id="dtDatos" 
+                             rows="20" paginator="true" editable="true" rowKey="#{registro.id}" rowsPerPageTemplate="20,30,50" 
+                             paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                             paginatorPosition="bottom" paginatorAlwaysVisible="false" resizableColumns="true"
+                             widgetVar="wvDatos"  rowIndexVar="rowIndex" scrollable="true">
+
+                    <p:ajax event="rowEdit" listener="#{permisosBean.onRowEdit}" update="@([id$=dtDatos]) @([id$=msgs])" />
+                    <p:ajax event="rowEditCancel" listener="#{permisosBean.onRowCancel}" update="@([id$=dtDatos]) @([id$=msgs])" />
+
+                    <f:facet name="header">
+                        <p:outputPanel style="text-align: right;">
+                            <p:commandButton icon="ui-icon-plus" value="Nuevo" action="#{permisosBean.cleanObject}" style="padding: 3px 10px;" 
+                                             update="@([id$=formNewRegistro]) @([id$=formData])" process="@form" >
+                                <f:setPropertyActionListener value="#{null}" target="#{permisosBean.instance}" />
+                                <f:setPropertyActionListener value="false" target="#{permisosBean.showPanelDatos}" />
+                                <f:setPropertyActionListener value="create" target="#{permisosBean.tipoActualizacion}" />
+                            </p:commandButton>
+                        </p:outputPanel>
+                    </f:facet>
+
+                    <p:column headerText="Orden" style="width:40px; text-align: center;" >
+                        <p:cellEditor>
+                            <f:facet name="output">
+                                <h:outputText value="#{registro.orden}" />
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText  value="#{registro.orden}" style="width: 95%;" />
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <p:column headerText="Menu" style="width:115px; text-align: center;" filterBy="#{registro.opcion.nombre}" 
+                              filterMatchMode="contains" filterStyle="width: 90%;">
+                        <p:cellEditor>
+                            <f:facet name="output">
+                                <h:outputText value="#{registro.opcion.nombre}" rendered="#{registro.opcionId ne null}" ></h:outputText>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:selectOneMenu id="menuo" value="#{registro.opcionId}" style="width: 95%;" >
+                                    <f:selectItem  itemValue="#{null}" itemLabel=" - " />
+                                    <f:selectItems value="#{permisosBean.listaMenu}" var="lstamen" itemValue="#{lstamen.id}" itemLabel="#{lstamen.nombre}" />
+                                </p:selectOneMenu>   
+
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <p:column headerText="Ruta" style="width:225px;" sortBy="#{registro.control}">
+                        <p:cellEditor>
+                            <f:facet name="output"><h:outputText value="#{registro.control}" ></h:outputText></f:facet>
+                            <f:facet name="input">
+                                <p:inputText  value="#{registro.control}" style="width: 95%;" />
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <p:column headerText="Nombre" style="width:115px; text-align: center;" sortBy="#{registro.nombre}">
+                        <p:cellEditor>
+                            <f:facet name="output"><h:outputText value="#{registro.nombre}" ></h:outputText></f:facet>
+                            <f:facet name="input">
+                                <p:inputText  value="#{registro.nombre}"  required="true" style="width: 95%;" />
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <p:column headerText="Imagen" style="width:115px; text-align: center;" sortBy="#{registro.imagen}">
+                        <p:cellEditor>
+                            <f:facet name="output"><h:outputText value="#{registro.imagen}" ></h:outputText></f:facet>
+                            <f:facet name="input">
+                                <p:inputText  value="#{registro.imagen}"  required="true" style="width: 95%;" />
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <p:column style="width:35px; text-align: center" >
+                        <p:rowEditor />
+                    </p:column>
+
+                    <p:column style="width:35px; text-align: center" >
+                        <p:commandLink action="#{permisosBean.delete}" process="@this" update="@([id$=dtDatos]) @([id$=msgs])" title="Eliminar registro" >
+                            <span class="ui-icon ui-icon-trash"></span> 
+                            <f:setPropertyActionListener value="#{registro}" target="#{permisosBean.selected}" />
+                            <p:confirm header="Confirmación" message="Estás seguro de eliminar el registro?" icon="ui-icon-alert" />
+                        </p:commandLink> 
+                    </p:column>
+
+                </p:dataTable>
+            </p:panel>
+
+        </h:form>
+
+        <h:form id="formNewRegistro" >
+            <p:panel id="pnlActualizacion" visible="#{not permisosBean.showPanelDatos}" >
+
+                <f:facet name="header" >
+                    <h:outputText value="Alta de Opcion" rendered="#{permisosBean.tipoActualizacion eq 'create'}" />
+                    <h:outputText value="Actualizacion de Opcion" rendered="#{permisosBean.tipoActualizacion eq 'update'}" />
+                </f:facet>
+
+                <b:container style="width: 100%;">
+                    <b:row>
+                        <b:column col-lg="3" col-md="6" col-sm="6" col-xs="10" style="padding: 0px;" >
+                            <pe:fluidGridItem styleClass="input-medium">
+                                <div class="dynaFormLabel">
+                                    <p:outputLabel value="Ruta:" for="rta" />
+                                </div>
+                                <p:inputText id="rta" value="#{permisosBean.instance.control}" maxlength="128" style="width: 95%" />
+                            </pe:fluidGridItem>
+                        </b:column>
+                        <b:column col-lg="3" col-md="6" col-sm="6" col-xs="10" style="padding: 0px;" >
+                            <pe:fluidGridItem styleClass="input-medium">
+                                <div class="dynaFormLabel">
+                                    <p:outputLabel value="Nombre:" for="nom" />
+                                </div>
+                                <p:inputText id="nom" value="#{permisosBean.instance.nombre}" maxlength="128" required="true" style="width: 95%" />
+                            </pe:fluidGridItem> 
+                        </b:column>
+                        <b:column col-lg="3" col-md="6" col-sm="6" col-xs="10" style="padding: 0px;" >
+                            <pe:fluidGridItem styleClass="input-medium">
+                                <div class="dynaFormLabel">
+                                    <p:outputLabel value="Icono:" for="im" />
+                                </div>
+                                <p:inputText id="im" value="#{permisosBean.instance.imagen}" maxlength="128" required="true" style="width: 95%" />
+                            </pe:fluidGridItem>
+                        </b:column>
+                        <b:column col-lg="3" col-md="6" col-sm="6" col-xs="10" style="padding: 0px;" >
+                            <pe:fluidGridItem styleClass="select-responsive">
+                                <div class="dynaFormLabel">
+                                    <p:outputLabel value="Menú Padre:" for="menuo" />
+                                </div>
+                                <p:selectOneMenu id="menuo" value="#{permisosBean.instance.opcionId}" style="width: 95%" >
+                                    <f:selectItem itemValue="#{null}" itemLabel=" - " />
+                                    <f:selectItems value="#{permisosBean.listaMenu}" var="lstamen" itemValue="#{lstamen.id}" itemLabel="#{lstamen.nombre}" />
+                                </p:selectOneMenu>                            
+                            </pe:fluidGridItem>
+                        </b:column>
+                    </b:row>
+                    <b:row>
+                        <b:column col-lg="3" col-md="6" col-sm="6" col-xs="10" style="padding: 0px;" >
+                            <pe:fluidGridItem styleClass="input-medium">
+                                <div class="dynaFormLabel">
+                                    <p:outputLabel value="Orden:" for="ord" />
+                                </div>
+                                <p:inputText id="ord" value="#{permisosBean.instance.orden}" maxlength="3" required="true" >
+                                    <pe:keyFilter mask="pint" />
+                                </p:inputText>
+                            </pe:fluidGridItem>
+                        </b:column>
+                        <b:column col-lg="3" col-md="6" col-sm="6" col-xs="10" style="padding: 0px;" >
+                            <pe:fluidGridItem styleClass="select-responsive">
+                                <div class="dynaFormLabel">
+                                    <p:outputLabel value="Perfil:" for="pe" />
+                                </div>
+                                <p:selectManyMenu  id="pe" value="#{permisosBean.selectedPerfiles}" required="true" style="width: 95%" 
+                                                   filter="true" filterMatchMode="contains" showCheckbox="true">
+                                    <f:selectItems value="#{permisosBean.listaPerfiles}" var="lr" itemValue="#{lr.id}" itemLabel="#{lr.nombre}" />
+                                </p:selectManyMenu>                            
+                            </pe:fluidGridItem>
+                        </b:column>
+                    </b:row>
+                </b:container>
+
+                <f:facet name="footer" >
+                    <p:commandButton type="submit" value="Agregar" actionListener="#{permisosBean.create}" process="@form"
+                                     update="@([id$=formNewRegistro]) @([id$=formData]) @([id$=msgs])" icon="fa fa-save"
+                                     rendered="#{permisosBean.tipoActualizacion eq 'create'}" />
+                    <p:spacer width="10" />
+                    <p:commandButton value="Cancelar" update="@([id$=formNewRegistro]) @([id$=formData])" process="@this" icon="fa fa-hand-o-left" >
+                        <f:setPropertyActionListener value="true" target="#{permisosBean.showPanelDatos}" />
+                        <p:resetInput target="pnlActualizacion" />
+                    </p:commandButton>
+
+
+                </f:facet>
+
+            </p:panel>
+        </h:form>
+    </ui:define>
+</ui:composition>

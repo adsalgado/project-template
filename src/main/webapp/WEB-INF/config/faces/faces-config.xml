@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<faces-config version="2.1"
+              xmlns="http://java.sun.com/xml/ns/javaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_1.xsd">
+
+
+    <application>
+        
+        <variable-resolver>org.springframework.web.jsf.DelegatingVariableResolver</variable-resolver>
+        <el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver</el-resolver>
+        <el-resolver>org.primefaces.application.exceptionhandler.PrimeExceptionHandlerELResolver</el-resolver>
+        
+        <action-listener>org.primefaces.application.DialogActionListener</action-listener>
+        <navigation-handler>org.primefaces.application.DialogNavigationHandler</navigation-handler>
+        <view-handler>org.primefaces.application.DialogViewHandler</view-handler>
+                
+        <resource-bundle>
+            <base-name>message</base-name>
+            <var>bundle</var>
+        </resource-bundle>
+        <message-bundle>message_es_MX</message-bundle>
+
+    </application>
+ 
+
+    <factory>
+        <exception-handler-factory>org.primefaces.application.exceptionhandler.PrimeExceptionHandlerFactory</exception-handler-factory>
+    </factory>
+
+    <lifecycle>
+        <phase-listener>com.pissa.tia.core.beans.Login</phase-listener>
+        <phase-listener>com.pissa.tia.lib.security.core.listener.MyJsfAjaxTimeoutPhaseListener</phase-listener>
+    </lifecycle>
+ 
+</faces-config>

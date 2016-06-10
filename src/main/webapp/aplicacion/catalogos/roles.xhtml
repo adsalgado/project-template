@@ -1,0 +1,145 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:b="http://bootsfaces.net/ui"
+                template="/WEB-INF/adminLTE/template.xhtml">
+
+    <ui:define name="headerContent">
+        <h1>
+            <span class="text-blue text-bold">C</span>atálogos - <span class="text-blue text-bold">P</span>erfiles
+        </h1>
+    </ui:define>
+
+    <ui:define name="centerContent">
+
+        <p:growl id="msgs" autoUpdate="false" showDetail="true" />
+
+        <h:form id="formData">
+            <p:focus context="pnlData" />
+
+            <p:panel id="pnlData" styleClass="blockable" visible="#{rolBean.showPanelDatos}" >
+
+                <p:dataTable var="rol" value="#{rolBean.lazyModel}" rows="25"
+                             id="dtDatos"
+                             lazy="true"
+                             paginator="true"
+                             editable="true"
+                             rowKey="#{rol.id}"
+                             paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                             rowsPerPageTemplate="10,15" paginatorPosition="bottom" paginatorAlwaysVisible="false"
+                             widgetVar="wvDatos">
+
+                    <p:ajax event="rowEdit" listener="#{rolBean.onRowEdit}" update="@([id$=dtDatos]) @([id$=panelBusqueda]) @([id$=msgs])" />
+                    <p:ajax event="rowEditCancel" listener="#{rolBean.onRowCancel}" update="@([id$=dtDatos]) @([id$=panelBusqueda]) @([id$=msgs])" />
+
+                    <f:facet name="header">
+                        <p:outputPanel style="text-align: right;">
+                            <p:commandButton icon="fa fa-lg fa-plus-square" value="Nuevo" action="#{rolBean.cleanObject}" 
+                                             update="@([id$=formNewRegistro]) @([id$=formData])" process="@form" style="padding: 3px 10px;" >
+                                <f:setPropertyActionListener value="#{null}" target="#{rolBean.rolInstance}" />
+                                <f:setPropertyActionListener value="false" target="#{rolBean.showPanelDatos}" />
+                                <f:setPropertyActionListener value="create" target="#{rolBean.tipoActualizacion}" />
+                            </p:commandButton>
+                            <p:spacer style="width: 3px;" />
+                            <p:commandButton style="margin-left: 2px; padding: 2px;" icon="icon-system-file-pdf" ajax="false">
+                                <p:dataExporter type="pdf" target="formRoles:dtRoles" fileName="perfiles" />
+                            </p:commandButton>
+                            <p:spacer style="width: 3px;" />
+                            <p:commandButton style="margin-left: 2px; padding: 2px;" icon="icon-system-file-excel" ajax="false">
+                                <p:dataExporter type="xls" target="formRoles:dtRoles" fileName="perfiles" />
+                            </p:commandButton>
+                        </p:outputPanel>
+                    </f:facet>
+
+                    <!--<p:column selectionMode="multiple" style="width:16px;text-align:center"/>-->
+
+                    <p:column headerText="Id" style="width:45px" sortBy="#{rol.id}" filterBy="#{rol.id}" filterMaxLength="4" filterStyle="width: 80%;">
+                        <h:outputText value="#{rol.id}" />
+                    </p:column>
+
+                    <p:column headerText="Nombre" sortBy="#{rol.nombre}" filterBy="#{rol.nombre}" filterMaxLength="25" filterStyle="width: 80%;" >
+                        <p:cellEditor>
+                            <f:facet name="output"><h:outputText value="#{rol.nombre}" /></f:facet>
+                            <f:facet name="input"><p:inputText value="#{rol.nombre}" style="width:98%" label="Nombre" maxlength="30" /></f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <p:column headerText="Funciones">
+                        <p:cellEditor>
+                            <f:facet name="output"><h:outputText value="#{rol.funciones}" /></f:facet>
+                            <f:facet name="input">
+                                <p:inputTextarea value="#{rol.funciones}" style="width: 98%" rows="3" cols="30" counter="display" maxlength="250" counterTemplate="{0} characters remaining." autoResize="false" />
+                                <h:outputText id="display" />
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <p:column style="width:35px;" exportable="false">
+                        <p:rowEditor />
+                    </p:column>
+
+                    <p:column style="width:35px;" exportable="false">
+                        <p:commandLink action="#{rolBean.delete}" process="@this" update="@([id$=dtDatos]) @([id$=msgs])" title="Eliminar rol" >
+                            <span class="ui-icon ui-icon-trash"></span> 
+                            <f:setPropertyActionListener value="#{rol}" target="#{rolBean.selectedRol}" />
+                            <p:confirm header="Confirmation" message="¿Desea eliminar el perfil seleccionado?" icon="ui-icon-alert" />
+                        </p:commandLink> 
+                    </p:column>
+
+                    <p:column style="width:50px; text-align: center;" exportable="false">
+                        <p:commandButton icon="ui-icon ui-icon-person" action="#{rolBean.permisos}" title="Permisos" >
+                            <!--<span class="ui-icon ui-icon-person"></span>--> 
+                            <f:setPropertyActionListener value="#{rol}" target="#{rolBean.selectedRol}" />
+                            <p:ajax event="dialogReturn" listener="#{rolBean.onPermisosSave}" update="@([id$=msgs])" />
+                        </p:commandButton> 
+                    </p:column>
+                </p:dataTable>
+
+            </p:panel>
+
+        </h:form>
+
+        <h:form id="formNewRegistro" >
+            <p:panel id="pnlActualizacion" visible="#{not rolBean.showPanelDatos}" >
+                <f:facet name="header" >
+                    <h:outputText value="Alta de Perfil" rendered="#{rolBean.tipoActualizacion eq 'create'}" />
+                    <h:outputText value="Actualización de Perfil" rendered="#{rolBean.tipoActualizacion eq 'update'}" />
+                </f:facet>
+
+                <pe:fluidGrid styleClass="fluidGrid" hGutter="10" vGutter="5" style="width: 100%;" id="fluidGrid">
+                    <pe:fluidGridItem styleClass="input-medium">
+                        <div class="dynaFormLabel">
+                            <p:outputLabel value="Nombre" for="nombre" />
+                        </div>
+                        <p:inputText id="nombre" value="#{rolBean.rolInstance.nombre}" maxlength="30" required="true" />
+                    </pe:fluidGridItem>
+                    <pe:fluidGridItem styleClass="textarea-large">
+                        <div class="dynaFormLabel">
+                            <p:outputLabel value="Funciones" for="funciones" />
+                        </div>
+                        <p:inputTextarea id="funciones" value="#{rolBean.rolInstance.funciones}" maxlength="250" autoResize="false" />
+                    </pe:fluidGridItem>
+                </pe:fluidGrid>
+
+                <f:facet name="footer" >
+                    <p:commandButton type="submit" value="Agregar" actionListener="#{rolBean.create}" process="@form"
+                                     update="@([id$=formNewRegistro]) @([id$=formData]) @([id$=msgs])" icon="fa fa-save"
+                                     rendered="#{rolBean.tipoActualizacion eq 'create'}" />
+                    <p:spacer width="10" />
+                    <p:commandButton value="Cancelar" update="@([id$=formNewRegistro]) @([id$=formData])" process="@this" icon="fa fa-hand-o-left" >
+                        <f:setPropertyActionListener value="true" target="#{rolBean.showPanelDatos}" />
+                        <p:resetInput target="pnlActualizacion" />
+                    </p:commandButton>
+
+                </f:facet>
+
+            </p:panel>
+
+        </h:form>
+
+    </ui:define>
+
+</ui:composition>

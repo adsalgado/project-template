@@ -1,0 +1,64 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:b="http://bootsfaces.net/ui"
+                template="/WEB-INF/adminLTE/template.xhtml">
+
+    <ui:define name="head">
+        <style type="text/css">
+            .form-signin-bs {
+                margin: 0 auto;
+                min-width: 330px;
+                max-width: 530px;
+                padding: 15px;
+            }
+        </style>
+    </ui:define>
+
+    <ui:define name="headerContent">
+        <h1>
+            <span class="text-blue text-bold">C</span>atálogos - <span class="text-orange text-bold">Usuario Jerarquia</span>
+        </h1>
+    </ui:define>
+
+    <ui:define name="centerContent">
+        <h:form id="formNewRegistro" >
+            <p:panel id="pnlActualizacion">
+
+                <pe:fluidGrid styleClass="fluidGrid" hGutter="10" vGutter="5" style="width: 100%;" id="fluidGrid">
+
+                    <pe:fluidGridItem styleClass="select-small">
+                        <div class="dynaFormLabel">
+                            <p:outputLabel value="Usuario:" for="user" />
+                        </div>
+                        <p:selectOneMenu id="user" value="#{usuarioJerarquiaBean.userId}" required="true">
+                            <p:ajax listener="#{usuarioJerarquiaBean.onUserChange}" update="Jefe" />
+                            <f:selectItem itemValue="#{null}" itemLabel="[-- SELECCIONE --]" />
+                            <f:selectItems value="#{usuarioJerarquiaBean.users}" var="user" itemLabel="#{user.userName}" itemValue="#{user.id}" />
+                        </p:selectOneMenu>
+                    </pe:fluidGridItem>
+
+                    <pe:fluidGridItem styleClass="select-small">
+                        <div class="dynaFormLabel">
+                            <p:outputLabel value="Jefe inmediato" for="Jefe" />
+                        </div>
+                        <p:selectOneMenu id="Jefe" value="#{usuarioJerarquiaBean.paternId}" required="true">
+                            <p:ajax listener="#{usuarioJerarquiaBean.onPaternChange()}" update="Jefe" />
+                            <f:selectItem itemValue="#{null}" itemLabel="[-- SELECCIONE --]" />
+                            <f:selectItems value="#{usuarioJerarquiaBean.paterns}" var="jefe" itemLabel="#{jefe.userName}" itemValue="#{jefe.id}" />
+                        </p:selectOneMenu>
+                    </pe:fluidGridItem>
+                </pe:fluidGrid>
+                <f:facet name="footer" >
+                    <p:commandButton type="submit" value="Agregar" actionListener="#{usuarioJerarquiaBean.guardaJerarquia()}" process="@form"
+                                     update="@([id$=formNewRegistro]) @([id$=formData]) @([id$=msgs])" icon="fa fa-save" />
+                    <p:spacer width="10" />
+                </f:facet>
+                
+            </p:panel>
+        </h:form>
+    </ui:define>
+</ui:composition>
