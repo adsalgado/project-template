@@ -59,7 +59,7 @@
                         <div class="dynaFormLabel">
                             <p:outputLabel value="Perfil:" for="perfil" />
                         </div>
-                        <p:selectOneMenu id="perfil" value="#{usuarioBean.usuarioFilter.rolId.id}" >
+                        <p:selectOneMenu id="perfil" value="#{usuarioBean.usuarioFilter.rolId}" >
                             <f:selectItem itemLabel="[ -TODOS- ]" itemValue="0" />
                             <f:selectItems value="#{usuarioBean.roles}" var="rol" itemLabel="#{rol.nombre}" itemValue="#{rol.id}" />
                         </p:selectOneMenu>
@@ -102,13 +102,6 @@
 
                     <!--<p:column selectionMode="multiple" style="width:16px;text-align:center"/>-->
 
-                    <p:column style="width:35px; text-align: center" rendered="false" >
-                        <b:commandButton value="" styleClass="add-tooltip-class" iconAwesome="key" size="xs" look="primary" action="#{usuarioBean.consultaAutorizadores}" 
-                                         oncomplete="PF('autorizaciones').show();" ajax="true" title="Autorizaciones" >  
-                            <f:setPropertyActionListener value="#{usuario}" target="#{usuarioBean.selectedUsuario}" />
-                        </b:commandButton>
-                    </p:column>
-
                     <p:column headerText="Username" style="width:115px; text-align: center;" sortBy="#{usuario.userName}">
                         <h:outputText value="#{usuario.userName}" />
                     </p:column>
@@ -144,9 +137,9 @@
 
                     <p:column headerText="Perfil" sortBy="#{usuario.rolId}" style="width:185px; text-align: center;">
                         <p:cellEditor>
-                            <f:facet name="output"><h:outputText value="#{usuario.rolId.nombre}" /></f:facet>
+                            <f:facet name="output"><h:outputText value="#{usuario.rol.nombre}" /></f:facet>
                             <f:facet name="input">
-                                <p:selectOneMenu value="#{usuario.rolId.id}" style="width:100%">
+                                <p:selectOneMenu value="#{usuario.rolId}" style="width:100%">
                                     <f:selectItems value="#{usuarioBean.roles}" var="rol" itemLabel="#{rol.nombre}" itemValue="#{rol.id}" />
                                 </p:selectOneMenu>
                             </f:facet>
@@ -249,7 +242,7 @@
                         <div class="dynaFormLabel">
                             <p:outputLabel value="Rol:" for="rol" />
                         </div>
-                        <p:selectOneMenu id="rol" value="#{usuarioBean.usuarioInstance.rolId.id}" required="true">
+                        <p:selectOneMenu id="rol" value="#{usuarioBean.usuarioInstance.rolId}" required="true">
                             <f:selectItem itemValue="#{null}" itemLabel="[-- SELECCIONE --]" />
                             <f:selectItems value="#{usuarioBean.roles}" var="rol" itemLabel="#{rol.nombre}" itemValue="#{rol.id}" />
                         </p:selectOneMenu>
@@ -280,47 +273,6 @@
 
             </p:panel>
         </h:form>
-
-        <p:dialog widgetVar="autorizaciones" id="autorizaciones" dynamic="true" appendTo="@(body)" modal="true" header="Autorizaciones">
-            <h:form id="formAutorizacion" class="form-signin-bs">
-                <p:panel>
-                    <p:panelGrid columns="2" style="width: 100%;">
-
-                        <p:outputLabel for="login" value="Login: " />
-                        <p:inputText id="login" value="#{usuarioBean.autorizador.login}" required="true" requiredMessage="* La clave de usuario es requerido" 
-                                     styleClass="form-control" placeholder="Clave de usuario" autocomplete="off" disabled="true" />
-
-                        <p:outputLabel for="clave" value="Clave: " />
-                        <p:inputText id="clave"  value="#{usuarioBean.autorizador.claveAutorizacion}" autocomplete="off" maxlength="12" required="true" 
-                                     requiredMessage="* La clave de autorización es requerida" styleClass="form-control" placeholder="Clave de autorización" />
-
-                        <f:facet name="footer" >
-                            <div style="text-align: left; margin: 2px; padding: 2px;" >
-                                <p:commandButton value="Aceptar" icon="fa fa-sign-in" actionListener="#{usuarioBean.saveAutorizador}" 
-                                                 oncomplete="handleRequest(xhr, status, args);" update="formAutorizacion @([id$=msgs])" />
-                                <b:commandButton look="primary" value="Aceptar" iconAwesome="sign-in" actionListener="#{usuarioBean.saveAutorizador}" ajax="true" 
-                                                 oncomplete="handleRequest(xhr, status, args);" update="formAutorizacion" rendered="false" />
-                                <p:spacer width="6" />
-                                <b:commandButton look="important" value="Cancelar" iconAwesome="ban" actionListener="#{usuarioBean.saveAutorizador}" ajax="true" 
-                                                 oncomplete="handleRequest(xhr, status, args);" rendered="false" />
-                                <p:commandButton value="Cancelar" icon="fa fa-ban" oncomplete="PF('autorizaciones').hide();" process="@this" >
-                                    <p:resetInput target="formAutorizacion" />
-                                </p:commandButton>
-
-                            </div>
-                        </f:facet>
-                    </p:panelGrid>
-                </p:panel>
-            </h:form>
-        </p:dialog>
-
-        <script type="text/javascript">
-            function handleRequest(xhr, status, args) {
-                if (!args.validationFailed &amp;&amp; args.saved) {
-                    PF('autorizaciones').hide();
-                }
-            }
-        </script>
 
     </ui:define>
 

@@ -48,7 +48,7 @@
             }
 
             @media (max-width: 1024px) {
-                
+
             }
 
         </style>
@@ -59,11 +59,11 @@
             <p:focus  />
             <!--<img src="resources/images/scif.png" style="width: 70%; margin-left: 15%;" />-->
             <!--            <h3><span class="text-blue text-bold">A</span>cceso </h3>-->
-        
-            
+
             <div class="form-group">
                 <div class="acceso text-blue"><p><span class="text-blue">I</span>niciar <span class="text-blue">S</span>esión</p></div>
                 <hr/>
+                <p:messages autoUpdate="true" showSummary="false" showDetail="true" />
                 <div class="input-group">
                     <span class="input-group-addon">
                         <i class="fa fa-user"></i>
@@ -84,9 +84,10 @@
                 </div>
             </div>
 
-            <b:commandButton look="primary btn-block" value="Ingresar" iconAwesome="sign-in" size="lg" actionListener="#{login.doLogin}" />
+            <b:commandButton look="primary btn-block" value="Ingresar" iconAwesome="sign-in" size="lg" action="#{login.doLogin}" />
 
-        </h:form>        
+        </h:form>
+
     </ui:define>
 
 </ui:composition>
