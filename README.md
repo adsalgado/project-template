@@ -1,2 +1,2 @@
 # projects
-Java Spring Hibernate projects
+Java Spring Hibernate project
